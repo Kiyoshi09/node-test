@@ -17,28 +17,141 @@ router.get('/', (req, res, next)=>{
                     title : 'Hello !',
                     content : rows
                 };
-                res.render('hello', data);
+                res.render('hello/index', data);
             }
         })
     })
 })
 
-/*
-router.get('/', (req, res, next)=>{
+// add
+router.get('/add', (req, res, next)=>{
+    var data = {
+        title : "Hello/Add",
+        content : '新しいレコードを追加'
+    }
+    res.render('hello/add', data);
+})
 
-    db.serialize(() => {
-        db.all('select * from mydata',(err, rows) => {
-            if(!err){
-                var data = {
-                    title : 'Hello',
-                    content : rows
-                }
-                res.render('hello', data)
-            }
-        });
+router.post('/add', (req,res,next)=>{
+    const nm = req.body.name;
+    const ml = req.body.mail;
+    const ag = req.body.age;
+
+    db.serialize(()=>{
+        db.run('insert into mydata (Name, mail, age) values (?,?,?)', nm, ml, ag);
     });
 
+    res.redirect('/hello');
 });
+
+// show
+router.get('/show', (req, res, next)=>{
+    const id = req.query.id;
+    db.serialize(()=>{
+        const q = "select * from mydata where id=?";
+        db.get(q, [id], (err, row)=>{
+            if(!err){
+                var data = {
+                    title : 'Hello/show',
+                    content : 'id = ' + id + 'のレコード',
+                    mydata : row
+                }
+
+                res.render('hello/show', data);
+            }
+        })
+    })
+})
+
+// edit
+
+/*
+router.get('/edit', (req, res, next)=>{
+    const id = req.query.id;
+    db.serialize(()=>{
+        const q = "select * from mydata where id = ?";
+        db.get(q, [id], (err, row)=>{
+            if(!err){
+                var data = {
+                    title : 'hello/edit',
+                    content : 'id = ' + id + ' のレコードを編集 : ',
+                    mydata : row
+                }
+                res.render('hello/edit', data);
+            }
+        })
+    })
+})
+
+router.post('/edit', (req, res, next)=>{
+    const id = req.body.id;
+    const nm = req.body.name;
+    const ml = req.body.mail;
+    const ag = req.body.age;
+    const q  = "update mydata set Name=?, mail=?, age=? where id = ?";
+    db.serialize(()=>{
+        db.run(q, nm, ml, ag, id);
+    })
+    res.redirect('hello/');
+})
 */
+
+router.get('/edit', (req, res, next) => {
+    const id = req.query.id;
+    db.serialize(() => {
+        const q = "select * from mydata where id = ?";
+        db.get(q, [id], (err, row) => {
+            if (!err) {
+                var data = {
+                title: 'hello/edit',
+                content: 'id = ' + id + ' のレコードを編集：',
+                mydata: row
+            }
+            res.render('hello/edit', data);
+            }   
+        }); 
+    }); 
+  });
+  
+  router.post('/edit', (req, res, next) => {
+    const id = req.body.id;
+    const nm = req.body.name;
+    const ml = req.body.mail;
+    const ag = req.body.age;
+    const q = "update mydata set name = ?, mail = ?, age = ? where id = ?";
+    db.serialize(() => {
+      db.run(q, nm, ml, ag, id);
+    });
+    res.redirect('/hello');
+  });
+
+
+  router.get('/delete', (req, res, next)=>{
+      const id = req.query.id;
+      db.serialize(()=>{
+        const q = "select * from mydata where id = ?";
+        db.get(q, [id], (err, row) => {
+            if (!err) {
+                var data = {
+                title: 'hello/delete',
+                content: 'id = ' + id + ' のレコードを削除：',
+                mydata: row
+            }
+            res.render('hello/delete', data);
+            }   
+        }); 
+      })
+  })
+
+
+  router.post('/delete', (req, res, next) => {
+    const id = req.body.id;
+    const q = "delete from mydata where id = ?";
+    db.serialize(() => {
+      db.run(q, id);
+    });
+    res.redirect('/hello');
+  });
+
 
 module.exports = router;
