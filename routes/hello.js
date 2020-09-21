@@ -1,21 +1,25 @@
 const express = require('express');
 const router = express.Router();
+const sqlite3 = require('sqlite3');
+
+const db = new sqlite3.Database('mydb.sqlite3');
 
 router.get('/', (req, res, next)=>{
 
-    var msg = "何か書いてちょんまげ。プリーズ";
-    if(req.session.message != undefined){
-        msg = "Last Message: " + req.session.message;
-    }
-
-    var data = {
-        title : 'Hello!',
-        content : msg
-    };
-
-    res.render('hello', data)
+    db.serialize(() => {
+        db.all('select * from mydata',(err, rows) => {
+            if(!err){
+                var data = {
+                    title : 'Hello',
+                    content : rows
+                }
+                res.render('hello', data)
+            }
+        });
+    });
 });
 
+/*
 router.post('/post', (req, res, next)=>{
     var msg = req.body['message'];
     req.session.message = msg;
@@ -27,5 +31,6 @@ router.post('/post', (req, res, next)=>{
 
     res.render('hello', data);
 });
+*/
 
 module.exports = router;

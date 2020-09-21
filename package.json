@@ -16,6 +16,7 @@
     "morgan": "~1.9.1",
     "sequelize": "^6.3.5",
     "sequelize-cli": "^6.2.0",
+    "sqlite3": "^5.0.0",
     "xml2js": "^0.4.23"
   }
 }
